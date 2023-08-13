@@ -1,0 +1,1 @@
+export const API = "https://indi-gg-back-end.vercel.app";
