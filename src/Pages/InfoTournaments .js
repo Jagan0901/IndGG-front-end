@@ -22,7 +22,7 @@ export function InfoTournaments() {
   const [status, setStatus] = useState("");
 
   const [about, setAbout] = useState(false);
-  const [crew, setCrew] = useState(true);
+  const [participantList, setParticipantList] = useState(true);
 
   const navigate = useNavigate();
 
@@ -55,7 +55,7 @@ export function InfoTournaments() {
     marginTop: "10px",
     marginBottom: "20px",
   };
-  const castStyles = {
+  const participantStyles = {
     marginTop: "25px",
     marginBottom: "25px",
   };
@@ -83,8 +83,8 @@ export function InfoTournaments() {
       <div style={buttonStyles}>
         <Button
           variant="outlined"
-          endIcon={crew ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          onClick={() => setCrew(!crew)}
+          endIcon={participantList ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          onClick={() => setParticipantList(!participantList)}
         >
           Participants List
         </Button>
@@ -96,9 +96,9 @@ export function InfoTournaments() {
           Add Participant
         </Button>
       </div>
-      {crew ? (
-        <div style={castStyles}>
-          <CastCrew tournamentId={tournamentId} />
+      {participantList ? (
+        <div style={participantStyles}>
+          <ParticipantCard tournamentId={tournamentId} />
         </div>
       ) : (
         ""
@@ -148,53 +148,52 @@ export function InfoTournaments() {
   );
 }
 
-function CastCrew({ tournamentId }) {
-  const [tournamentCast, setTournamentCast] = useState([]);
-  //  console.log(tournamentCast)
+function ParticipantCard({ tournamentId }) {
+  const [tournamentData, setTournamentData] = useState([]);
 
-  const getTournamentCrews = () => {
+  const getTournamentData = () => {
     fetch(`${API}/tournaments/${tournamentId}`, {
       method: "GET",
     })
       .then((data) => data.json())
-      .then((mv) => setTournamentCast(mv.participants));
+      .then((mv) => setTournamentData(mv.participants));
   };
 
-  useEffect(() => getTournamentCrews(), []);
+  useEffect(() => getTournamentData(), []);
 
-  const crewContainer = {
+  const participantContainer = {
     display: "flex",
     justifyContent: "space-between",
     flexWrap: "wrap",
   };
 
   return (
-    <div style={crewContainer}>
-      {tournamentCast.map((crew, index) => (
-        <DisplayCast cast={crew} key={index} />
+    <div style={participantContainer}>
+      {tournamentData.map((data, index) => (
+        <DisplayParticipant data={data} key={index} />
       ))}
     </div>
   );
 }
 
-function DisplayCast({ cast }) {
+function DisplayParticipant({ data }) {
   const picStyles = {
     height: "300px",
     width: "200px",
     objectFit: "cover",
   };
-  const castName = {
+  const participantName = {
     fontSize: "15px",
     textAlign: "center",
     fontWeight: "bold",
   };
-  const castContainer = {
+  const participantContainer = {
     border: "10px solid",
   };
   return (
-    <div style={castContainer}>
-      <img style={picStyles} src={cast.image} alt={cast.name} />
-      <p style={castName}>{cast.name}</p>
+    <div style={participantContainer}>
+      <img style={picStyles} src={data.image} alt={data.name} />
+      <p style={participantName}>{data.name}</p>
     </div>
   );
 }
