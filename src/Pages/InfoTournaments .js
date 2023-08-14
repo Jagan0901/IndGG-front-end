@@ -5,11 +5,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { useNavigate } from "react-router-dom";
-import { API } from "../API";
 import TextField from "@mui/material/TextField";
 import { NavBar } from "../NavBar";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
+import { API } from "../API";
 // import { width } from '@mui/system';
 
 export function InfoTournaments() {
@@ -19,7 +19,7 @@ export function InfoTournaments() {
   const [tournament, setTournament] = useState({});
   const [name,setName] = useState("");
   const [email,setEmail] = useState("");
-  const [status, setStatus] = useState("");
+  const [response, setResponse] = useState("");
 
   const [about, setAbout] = useState(false);
   const [participantList, setParticipantList] = useState(true);
@@ -35,7 +35,28 @@ export function InfoTournaments() {
   };
 
   const addParticipant = ()=>{
-    if(!name || !email) return setStatus("Please fill out the fields to add participant");
+    if(!name || !email) return setResponse("Please fill out the fields to add participant");
+
+    const participantDetails = {
+      name: name,
+      email: email,
+      tournamentId:tournamentId
+    }
+
+    fetch(`${API}/participants/addParticipant`,{
+      method:"POST",
+      body:JSON.stringify(participantDetails),
+      headers:{"Content-type":"application/json"}
+    })
+     .then((res)=> res.json())
+     .then((res)=>{
+        if(res.message){
+          setResponse(res.message)
+        }else if(res.error){
+          setResponse(res.error)
+        }
+     })
+       .catch((err)=> setResponse(err.message));
     
   };
 
@@ -98,7 +119,7 @@ export function InfoTournaments() {
       </div>
       {participantList ? (
         <div style={participantStyles}>
-          <ParticipantCard tournamentId={tournamentId} />
+          <ParticipantCard tournamentId={tournamentId} refresh={response}/>
         </div>
       ) : (
         ""
@@ -127,7 +148,7 @@ export function InfoTournaments() {
           <Button variant="contained" onClick={addParticipant}>
             ADD
           </Button>
-          <p style={{ color: "red", fontWeight: "bold" }}>{status}</p>
+          <p style={{ color: response === "Participant added Successfully" ? "darkGreen" : "red", fontWeight: "bold" }}>{response}</p>
         </div>
       ) : (
         ""
@@ -148,7 +169,7 @@ export function InfoTournaments() {
   );
 }
 
-function ParticipantCard({ tournamentId }) {
+function ParticipantCard({ tournamentId,refresh }) {
   const [tournamentData, setTournamentData] = useState([]);
 
   const getTournamentData = () => {
@@ -159,12 +180,13 @@ function ParticipantCard({ tournamentId }) {
       .then((mv) => setTournamentData(mv.participants));
   };
 
-  useEffect(() => getTournamentData(), []);
+  useEffect(() => getTournamentData(), [refresh]);
 
   const participantContainer = {
     display: "flex",
     justifyContent: "space-between",
     flexWrap: "wrap",
+    margin:"10px",
   };
 
   return (
@@ -189,6 +211,7 @@ function DisplayParticipant({ data }) {
   };
   const participantContainer = {
     border: "10px solid",
+    marginTop:"10px"
   };
   return (
     <div style={participantContainer}>
